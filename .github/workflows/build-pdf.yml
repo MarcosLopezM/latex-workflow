@@ -7,6 +7,11 @@ on:
         description: "LaTeX file to compile"
         required: true
         type: string
+      send_it:
+       description: "Sends the email if true"
+       required: false
+       type: boolean
+       default: false
       email_to:
         description: "Recipient email address"
         required: false
@@ -53,7 +58,7 @@ jobs:
           git-config-email: github-actions@github.com
 
       - name: Send email with PDF
-        if: ${{ inputs.email_to != '' && inputs.email_to != null }}
+        if: ${{ inputs.send_it && inputs.email_to != '' && inputs.email_to != null }}
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
