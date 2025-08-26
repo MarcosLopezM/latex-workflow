@@ -1,0 +1,68 @@
+name: Build PDF
+
+on:
+  workflow_call:
+    inputs:
+      root_file:
+        description: "LaTeX file to compile"
+        required: true
+        type: string
+      email_to:
+        description: "Recipient email address"
+        required: false
+        type: string
+      email_subject:
+        description: "Custom subject line for email"
+        required: false
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build PDF with LuaLaTeX
+        uses: xu-cheng/latex-action@v2
+        with:
+          root_file: ${{ inputs.root_file }}
+          latexmk_use_lualatex: true
+          cache: true
+          
+      - name: Create output folder
+        run: mkdir -p out && mv ${{ inputs.root_file }}.pdf out/
+
+      - name: Upload PDF file
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}
+          path: out/${{ inputs.root_file }}.pdf
+
+      - name: Ensure PDF was generated
+        run: test -f out/${{ inputs.root_file }}.pdf
+
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: out
+          clean: true
+          single-commit: true
+          git-config-name: github-actions
+          git-config-email: github-actions@github.com
+
+      - name: Send email with PDF
+        if: ${{ inputs.email_to != '' && inputs.email_to != null }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: ${{ inputs.email_subject || 'New PDF: ' + inputs.root_file + ' from ' + github.repository}}
+          to: ${{ inputs.email_to}} 
+          from: "GitHub Actions <${{ secrets.MAIL_USERNAME }}>"
+          body: "The latest PDF has been built and is attached."
+          attachments: out/${{ inputs.root_file }}.pdf
