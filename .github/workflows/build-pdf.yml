@@ -30,7 +30,7 @@ jobs:
           root_file: ${{ inputs.root_file }}
           latexmk_use_lualatex: true
           cache: true
-          
+
       - name: Create output folder
         run: mkdir -p out && mv ${{ inputs.root_file }}.pdf out/
 
@@ -42,7 +42,6 @@ jobs:
 
       - name: Ensure PDF was generated
         run: test -f out/${{ inputs.root_file }}.pdf
-
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
@@ -61,8 +60,8 @@ jobs:
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: ${{ inputs.email_subject || 'New PDF: ' + inputs.root_file + ' from ' + github.repository}}
-          to: ${{ inputs.email_to}} 
+          subject: ${{ inputs.email_subject || format('New PDF - {0} from {1}', inputs.root_file, github.repository) }}
+          to: ${{ inputs.email_to}}
           from: "GitHub Actions <${{ secrets.MAIL_USERNAME }}>"
           body: "The latest PDF has been built and is attached."
           attachments: out/${{ inputs.root_file }}.pdf
