@@ -3,15 +3,19 @@ name: Build PDF
 on:
   workflow_call:
     inputs:
-      root_file:
-        description: "LaTeX file to compile"
+      relative_path:
+        description: "Relative Project Path"
+        required: true
+        type: string
+      pdf_name:
+        description: "PDF name"
         required: true
         type: string
       send_it:
-       description: "Sends the email if true"
-       required: false
-       type: boolean
-       default: false
+        description: "Sends the email if true"
+        required: false
+        type: boolean
+        default: false
       email_to:
         description: "Recipient email address"
         required: false
@@ -32,26 +36,28 @@ jobs:
       - name: Build PDF with LuaLaTeX
         uses: xu-cheng/latex-action@v2
         with:
-          root_file: ${{ inputs.root_file }}
+          root_file: ${{ inputs.relative_path }}/main.tex
           latexmk_use_lualatex: true
           cache: true
-
       - name: Create output folder
-        run: mkdir -p out && mv ${{ inputs.root_file }}.pdf out/
+        run: |
+          mkdir -p build/${{ inputs.relative_path }}
+          mv ${{ inputs.relative_path }}/${{ inputs.pdf_name }}.pdf build/${{ inputs.relative_path }}/
+
 
       - name: Upload PDF file
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.repository.name }}
-          path: out/${{ inputs.root_file }}.pdf
+          name: ${{ github.event.repository.name }}-${{ inputs.relative_path }}
+          path: build/${{ inputs.pdf_name }}.pdf
 
       - name: Ensure PDF was generated
-        run: test -f out/${{ inputs.root_file }}.pdf
+        run: test -f build/${{ inputs.pdf_name }}.pdf
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: out
+          folder: build
           clean: true
           single-commit: true
           git-config-name: github-actions
@@ -65,8 +71,8 @@ jobs:
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: ${{ inputs.email_subject || format('New PDF - {0} from {1}', inputs.root_file, github.repository) }}
-          to: ${{ inputs.email_to}}
+          subject: ${{ inputs.email_subject || format('New PDF - {0} from {1}', inputs.relative_path, github.repository) }}
+          to: ${{ inputs.email_to }}
           from: "GitHub Actions <${{ secrets.MAIL_USERNAME }}>"
           body: "The latest PDF has been built and is attached."
-          attachments: out/${{ inputs.root_file }}.pdf
+          attachments: build/${{ inputs.pdf_name }}.pdf
