@@ -44,7 +44,10 @@ jobs:
         uses: xu-cheng/latex-action@v4
         with:
           root_file: ${{ inputs.relative_path }}/${{ inputs.pdf_name }}.tex
-          pre_compile: "tlmgr update --self && tlmgr update --all"
+          extra_fonts: |
+            ./fonts/linux-libertine/
+            ./fonts/linux-biolinum/
+          pre_compile: "mktexlsr && luaotfload-tool -fu && fc-cache -fv"
           latexmk_shell_escape: true
           latexmk_use_lualatex: true
         env:
