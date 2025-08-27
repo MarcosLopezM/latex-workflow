@@ -29,6 +29,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
 
     steps:
       - name: Checkout project repo
@@ -77,6 +81,7 @@ jobs:
           single-commit: true
           git-config-name: github-actions
           git-config-email: github-actions@github.com
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Send email with PDF
         if: ${{ inputs.send_it && inputs.email_to != '' && inputs.email_to != null }}
