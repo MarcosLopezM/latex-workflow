@@ -60,10 +60,10 @@ jobs:
           mkdir -p build/${{ inputs.relative_path }}
           mv ${{ inputs.relative_path }}/${{ inputs.pdf_name }}.pdf build/${{ inputs.relative_path }}/
 
-      - name: Upload PDF artifact
+      - name: Upload PDF file
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.repository.name }}-${{ inputs.relative_path }}
+          name: ${{ github.event.repository.name }}
           path: build/${{ inputs.relative_path }}/${{ inputs.pdf_name }}.pdf
 
       - name: Ensure PDF was generated
