@@ -4,15 +4,16 @@ on:
   workflow_call:
     inputs:
       relative_path:
-        description: "Relative Project Path"
+        description: "Relative path to the LaTeX project folder"
         required: true
         type: string
       pdf_name:
-        description: "PDF name"
-        required: true
+        description: "PDF name (without extension, defaults to 'main')"
+        required: false
         type: string
+        default: "main"
       send_it:
-        description: "Sends the email if true"
+        description: "Whether to send the PDF via email"
         required: false
         type: boolean
         default: false
@@ -21,7 +22,7 @@ on:
         required: false
         type: string
       email_subject:
-        description: "Custom subject line for email"
+        description: "Custom email subject"
         required: false
         type: string
 
@@ -30,31 +31,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout project repo
         uses: actions/checkout@v4
 
-      - name: Build PDF with LuaLaTeX
-        uses: xu-cheng/latex-action@v2
+      - name: Checkout HomeworkTemplate
+        uses: actions/checkout@v4
         with:
-          root_file: ${{ inputs.relative_path }}/main.tex
+          repository: MarcosLopezM/HomeworkTemplate
+          path: hw-template
+
+      - name: Build PDF with LuaLaTeX
+        uses: xu-cheng/latex-action@v4
+        with:
+          root_file: ${{ inputs.relative_path }}/${{ inputs.pdf_name }}.tex
+          pre_compile: "tlmgr update --self && tlmgr update --all"
+          latexmk_shell_escape: true
           latexmk_use_lualatex: true
           cache: true
+        env:
+          TEXINPUTS: ".:./hw-template//:"
+
       - name: Create output folder
         run: |
           mkdir -p build/${{ inputs.relative_path }}
           mv ${{ inputs.relative_path }}/${{ inputs.pdf_name }}.pdf build/${{ inputs.relative_path }}/
 
-
-      - name: Upload PDF file
+      - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event.repository.name }}-${{ inputs.relative_path }}
-          path: build/${{ inputs.pdf_name }}.pdf
+          path: build/${{ inputs.relative_path }}/${{ inputs.pdf_name }}.pdf
 
       - name: Ensure PDF was generated
-        run: test -f build/${{ inputs.pdf_name }}.pdf
+        run: test -f build/${{ inputs.relative_path }}/${{ inputs.pdf_name }}.pdf
 
-      - name: Deploy
+      - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: build
@@ -71,8 +82,8 @@ jobs:
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: ${{ inputs.email_subject || format('New PDF - {0} from {1}', inputs.relative_path, github.repository) }}
+          subject: ${{ inputs.email_subject != '' && inputs.email_subject || format('New PDF from {0}/{1}', github.repository, inputs.relative_path) }}
           to: ${{ inputs.email_to }}
           from: "GitHub Actions <${{ secrets.MAIL_USERNAME }}>"
           body: "The latest PDF has been built and is attached."
-          attachments: build/${{ inputs.pdf_name }}.pdf
+          attachments: build/${{ inputs.relative_path }}/${{ inputs.pdf_name }}.pdf
