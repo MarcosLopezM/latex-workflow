@@ -47,7 +47,6 @@ jobs:
           pre_compile: "tlmgr update --self && tlmgr update --all"
           latexmk_shell_escape: true
           latexmk_use_lualatex: true
-          cache: true
         env:
           TEXINPUTS: ".:./hw-template//:"
 
