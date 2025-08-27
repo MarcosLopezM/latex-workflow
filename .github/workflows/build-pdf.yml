@@ -52,7 +52,7 @@ jobs:
           latexmk_shell_escape: true
           latexmk_use_lualatex: true
         env:
-          TEXINPUTS: ".:../hw-template//:"
+          TEXINPUTS: ".:$GITHUB_WORKSPACE/hw-template//:"
         
 
       - name: Create output folder
