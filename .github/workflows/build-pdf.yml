@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       pdf_name:
-        description: "PDF name (without extension, defaults to 'main')"
+        description: "PDF name"
         required: false
         type: string
         default: "main"
