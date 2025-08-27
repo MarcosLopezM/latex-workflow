@@ -45,8 +45,8 @@ jobs:
         with:
           root_file: ${{ inputs.relative_path }}/${{ inputs.pdf_name }}.tex
           extra_fonts: |
-            ./fonts/linux-libertine/
-            ./fonts/linux-biolinum/
+            hw-template/fonts/linux-libertine/
+            hw-template/fonts/linux-biolinum/
           pre_compile: "mktexlsr && luaotfload-tool -fu && fc-cache -fv"
           latexmk_shell_escape: true
           latexmk_use_lualatex: true
