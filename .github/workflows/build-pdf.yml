@@ -99,4 +99,4 @@ jobs:
           to: ${{ inputs.email_to }}
           from: "GitHub Actions <${{ secrets.MAIL_USERNAME }}>"
           body: "The latest PDF has been built and is attached."
-          attachments: build/${{ inputs.relative_path }}/${{ inputs.pdf_name }}.pdf
+          attachments: build/${{ inputs.relative_path }}/${{ inputs.out_name }}.pdf
