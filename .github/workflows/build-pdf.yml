@@ -71,7 +71,7 @@ jobs:
       - name: Upload PDF file
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.repository.name }}
+          name: ${{ inputs.out_name }}
           path: build/${{ inputs.relative_path }}/${{ inputs.out_name }}.pdf
 
       - name: Ensure PDF was generated
