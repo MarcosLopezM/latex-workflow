@@ -34,6 +34,7 @@ jobs:
           curl -OL https://github.com/MarcosLopezM/HomeworkTemplate/archive/refs/heads/main.zip
           unzip main.zip
           mv HomeworkTemplate-main/ hw-template/
+          rm *.zip
           ls -lh
 
       - name: Build PDF with LuaLaTeX
@@ -48,7 +49,7 @@ jobs:
           latexmk_shell_escape: true
           latexmk_use_lualatex: true
         env:
-          TEXINPUTS: ".:./hw-template//:"
+          TEXINPUTS: ".:/hw-template//:"
         
 
       - name: Create output folder
