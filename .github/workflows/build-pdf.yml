@@ -32,8 +32,7 @@ jobs:
       - name: Download custom template
         run: |
           curl -OL https://github.com/MarcosLopezM/HomeworkTemplate/archive/refs/heads/main.zip
-          unzip main.zip
-          mv main hw-template
+          unzip main.zip -d hw-template
 
       - name: Build PDF with LuaLaTeX
         uses: xu-cheng/latex-action@v4
