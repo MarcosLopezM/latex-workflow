@@ -34,6 +34,7 @@ jobs:
           curl -OL https://github.com/MarcosLopezM/HomeworkTemplate/archive/refs/heads/main.zip
           unzip main.zip
           mv HomeworkTemplate-main/ hw-template/
+          ls -lh
 
       - name: Build PDF with LuaLaTeX
         uses: xu-cheng/latex-action@v4
