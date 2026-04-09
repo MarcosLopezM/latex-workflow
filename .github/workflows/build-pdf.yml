@@ -16,34 +16,19 @@ on:
         description: "Compiled PDF's name"
         required: true
         type: string
-      send_it:
-        description: "Whether to send the PDF via email"
-        required: false
-        type: boolean
-        default: false
-      email_to:
-        description: "Recipient email address"
-        required: false
-        type: string
-      email_subject:
-        description: "Custom email subject"
-        required: false
-        type: string
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pages: write
-      id-token: write
 
     steps:
       - name: Checkout project repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Checkout HomeworkTemplate
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: MarcosLopezM/HomeworkTemplate
           path: hw-template
@@ -68,35 +53,21 @@ jobs:
           mkdir -p build/${{ inputs.relative_path }}
           mv ${{ inputs.relative_path }}/${{ inputs.tex_name }}.pdf build/${{ inputs.relative_path }}/${{  inputs.out_name }}.pdf
 
+      - name: Ensure PDF was generated
+        run: test -f build/${{ inputs.relative_path }}/${{ inputs.out_name }}.pdf
+        
       - name: Upload PDF file
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.out_name }}
           path: build/${{ inputs.relative_path }}/${{ inputs.out_name }}.pdf
 
-      - name: Ensure PDF was generated
-        run: test -f build/${{ inputs.relative_path }}/${{ inputs.out_name }}.pdf
-
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: build
-          clean: true
-          single-commit: true
+          clean: false
+          branch: gh-pages
           git-config-name: github-actions
           git-config-email: github-actions@github.com
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Send email with PDF
-        if: ${{ inputs.send_it && inputs.email_to != '' && inputs.email_to != null }}
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
-          subject: ${{ inputs.email_subject != '' && inputs.email_subject || format('New PDF from {0}/{1}', github.repository, inputs.relative_path) }}
-          to: ${{ inputs.email_to }}
-          from: "GitHub Actions <${{ secrets.MAIL_USERNAME }}>"
-          body: "The latest PDF has been built and is attached."
-          attachments: build/${{ inputs.relative_path }}/${{ inputs.out_name }}.pdf
