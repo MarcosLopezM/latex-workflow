@@ -29,11 +29,11 @@ jobs:
       - name: Checkout project repo
         uses: actions/checkout@v6
 
-      - name: Checkout HomeworkTemplate
-        uses: actions/checkout@v6
-        with:
-          repository: MarcosLopezM/HomeworkTemplate
-          path: hw-template
+      - name: Download custom template
+        run: |
+          curl -OL https://github.com/MarcosLopezM/HomeworkTemplate/archive/refs/heads/main.zip
+          unzip main.zip
+          mv main hw-template
 
       - name: Build PDF with LuaLaTeX
         uses: xu-cheng/latex-action@v4
